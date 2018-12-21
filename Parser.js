@@ -1,8 +1,10 @@
 //tokenValue and tokenType are the variables representing the value and the type of the token you will probably read them from the input file and change their value after every 
 //getToken() call (This is just a hint, do whatever you think is the best)
 var tokenValue, tokenType;
+
 //program->stmtSeq
 function program() {
+    //This is the function to be called in the main function once you are ready to start ( you will probably need to do some stuff like tokens manipulation before calling it)
     stmtSeq();
 }
 //stmtSeq->stmt{;stmt}
