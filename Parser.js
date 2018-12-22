@@ -3,6 +3,7 @@ var tokenValue = [];
 var tokenType = [];
 var nodes = [{container: "#Parser", hideRootNode: true}, {}];
 var n = 1;
+var temp;
 const input = document.querySelector("#ip");
 input.addEventListener('change', function(e)
 {
@@ -200,7 +201,7 @@ function getToken() {
     if (tokenValue[0] != ";" && tokenValue[0] != "end")
     {
         nodes.push({parent: nodes[n], text : { name : tokenValue[0] }});
-        n++;
+        n = nodes.length - 1;
     }
     tokenValue.shift();
     tokenType.shift();
