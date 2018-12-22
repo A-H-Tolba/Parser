@@ -2,7 +2,7 @@ var scanned;
 var tokenValue = [];
 var tokenType = [];
 var nodes = [{container: "#Parser", hideRootNode: true}, {}];
-var n = 1;
+var n = 1, rep_flag = 0;
 var temp;
 var cp = [];
 const input = document.querySelector("#ip");
@@ -38,6 +38,11 @@ input.addEventListener('change', function(e)
 function program() {
     //This is the function to be called in the main function once you are ready to start ( you will probably need to do some stuff like tokens manipulation before calling it)
     stmtSeq();
+    for (var i = 0; i < nodes.length; i++)
+    {
+        if (nodes[i].type == "specialsymbol") {if(nodes[i-1].type != "assign") nodes[i-1].parent = nodes[i]; nodes[i+1].parent = nodes[i];}
+        else if (nodes[i].type == "assign") {if(nodes[i+2].type == "specialsymbol") nodes[i+2].parent = nodes[i]; else nodes[i+1].parent = nodes[i];}
+    }
     document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
     new Treant(nodes);
 }
@@ -201,10 +206,27 @@ function match(expectedToken){
 
 function getToken() {
     //This function should insert the token in its rightful place in the diagram
-    if (tokenValue[0] != ";" && tokenValue[0] != "end")
+    if(tokenValue[0] == ":=")
     {
-        nodes.push({parent: nodes[n], text : { name : tokenValue[0] }});
-        n = nodes.length - 1;
+        nodes[nodes.length-1].text.name = "assign\n" + nodes[nodes.length-1].text.name;
+        nodes[nodes.length-1].type = "assign";
+    }
+    else if(tokenValue[0] == "read" || tokenValue[0] == "write")
+    {
+        nodes.push({parent: nodes[n], text : { name : tokenValue[0]+"\n"+tokenValue[1]}, type : tokenType[0]});
+        if(n == 1) n = nodes.length - 1;
+        tokenValue.shift();
+        tokenType.shift();
+    }
+    /*else if(tokenValue[0] == "until")
+    {
+        n = rep_flag;
+    }*/
+    else if(tokenValue[0] != ";" && tokenValue[0] != "end" && tokenValue[0] != "then")
+    {
+        nodes.push({parent: nodes[n], text : { name : tokenValue[0] }, type : tokenType[0]});
+        if(n == 1) n = nodes.length - 1;
+        //if(tokenValue == "repeat") rep_flag = n;
     }
     tokenValue.shift();
     tokenType.shift();
