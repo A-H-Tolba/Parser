@@ -42,6 +42,7 @@ function stmtSeq() {
     stmt();
     while (tokenValue[0] == ';') {
         match(';');
+        n = 1;
         stmt();
     }
 }
@@ -196,8 +197,11 @@ function match(expectedToken){
 
 function getToken() {
     //This function should insert the token in its rightful place in the diagram
-    nodes.push({parent: nodes[n], text : { name : tokenValue[0] }});
-    n++;
+    if (tokenValue[0] != ";" && tokenValue[0] != "end")
+    {
+        nodes.push({parent: nodes[n], text : { name : tokenValue[0] }});
+        n++;
+    }
     tokenValue.shift();
     tokenType.shift();
     if(!tokenValue.length) 
