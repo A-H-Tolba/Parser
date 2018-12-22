@@ -1,23 +1,58 @@
+var scanned;
+var tokenValue = [];
+var tokenType = [];
+var nodes = [{container: "#Parser", hideRootNode: true}, {}];
+var n = 1;
+const input = document.querySelector("#ip");
+input.addEventListener('change', function(e)
+{
+    var file = new FileReader();
+    file.onload = function()
+    {
+        var s = 0;
+        scanned = file.result.replace(/\s+/,'');
+        while(scanned.indexOf('\n') > 0)
+        {
+            if (scanned[s] === ",") {tokenValue.push(scanned.slice(0, s)); tokenType.push(scanned.slice(s+1, scanned.indexOf('\n'))); scanned = scanned.slice(scanned.indexOf('\n')+1); s = 0;}
+            s++;
+        }
+        tokenValue.push(scanned.slice(0, scanned.indexOf(',')));
+        tokenType.push(scanned.slice(scanned.indexOf(',')+1, scanned.length));
+        for(var i = 0; i < tokenValue.length; i++)
+        {
+            tokenValue[i] = tokenValue[i].replace(/\s/g, '');
+            tokenType[i] = tokenType[i].replace(/\s/g, '');
+        }
+        program();
+    }
+    file.readAsText(input.files[0]);
+},false)
+
+
 //tokenValue and tokenType are the variables representing the value and the type of the token you will probably read them from the input file and change their value after every 
 //getToken() call (This is just a hint, do whatever you think is the best)
-var tokenValue, tokenType;
 
 //program->stmtSeq
 function program() {
     //This is the function to be called in the main function once you are ready to start ( you will probably need to do some stuff like tokens manipulation before calling it)
-    stmtSeq();
+    if(tokenValue.length) stmtSeq();
+    else
+    {
+        document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
+        new Treant(nodes);
+    }
 }
 //stmtSeq->stmt{;stmt}
 function stmtSeq() {
     stmt();
-    while (tokenValue == ';') {
+    while (tokenValue[0] == ';') {
         match(';');
         stmt();
     }
 }
 //statement(stmt)->ifStmt | repeatStmt | assignStmt | readStmt | writeStmt
 function stmt() {
-    switch (tokenType) {
+    switch (tokenValue[0]) {
         //ifStmt 
         case "if":
             ifStmt();
@@ -25,10 +60,6 @@ function stmt() {
         //repeatStmt
         case "repeat":
             repeatStmt();
-            break;
-        //assignStmt
-        case "identifier":
-            assignStmt();
             break;
         //readStmt
         case "read":
@@ -38,6 +69,9 @@ function stmt() {
         case "write":
             writeStmt();
             break;
+        default:
+            assignStmt();
+            break;
     }
 }
 //ifStmt->if exp then stmtSeq [else stmtSeq] end
@@ -46,7 +80,7 @@ function ifStmt() {
     exp();
     match("then");
     stmtSeq();
-    if (tokenValue == "else") {
+    if (tokenValue[0] == "else") {
         match("else");
         stmtSeq();
     }
@@ -78,14 +112,14 @@ function writeStmt() {
 //exp->simpleExp { comparison-op simpleExp }
 function exp() {
     simpleExp();
-    while (tokenValue == "=" || tokenValue == "<") {
+    while (tokenValue[0] == "=" || tokenValue[0] == "<") {
         compOp();
         simpleExp();
     }
 }
 //compOp-> < | =
 function compOp() {
-    switch (tokenValue) {
+    switch (tokenValue[0]) {
         case "<":
             match("<");
             break;
@@ -97,14 +131,14 @@ function compOp() {
 //simpleExp->term { addOp term }
 function simpleExp() {
     term();
-    while (tokenValue == "+" || tokenValue == "-") {
+    while (tokenValue[0] == "+" || tokenValue[0] == "-") {
         addOp();
         term();
     }
 }
 //addOp-> + | -
 function addOp() {
-    switch (tokenValue) {
+    switch (tokenValue[0]) {
         case "+":
             match("+");
             break;
@@ -116,14 +150,14 @@ function addOp() {
 //term->factor { mulOp factor }
 function term() {
     factor();
-    while (tokenValue == "*" || tokenValue == "/") {
+    while (tokenValue[0] == "*" || tokenValue[0] == "/") {
         mulOp();
         factor();
     }
 }
 //mulOp-> * | /
 function mulOp() {
-    switch (tokenValue) {
+    switch (tokenValue[0]) {
         case "*":
             match("*");
             break;
@@ -134,30 +168,33 @@ function mulOp() {
 }
 //factor->(exp) | number | identifier
 function factor() {
-    if(tokenValue == "(") {
+    if(tokenValue[0] == "(") {
        match("(");
        exp();
        match(")");
     }
-    else if (tokenType == "identifier") {
+    else if (tokenType[0] == "identifier") {
         match("identifier");
     }
-    else if (tokenType == "number") {
+    else if (tokenType[0] == "number") {
         match("number");
     }
 }
 
 function match(expectedToken){
     //compare the tokenType
+    console.log(expectedToken);
+    console.log(tokenType[0]);
     if (expectedToken == "identifier" || expectedToken == "number") {
-        if (tokenType.equals(expectedToken))
+        if (tokenType[0]===expectedToken)
             getToken();
         else
+            console.log("something's wrong flag");
             errorMsg();
     }
     //compare the tokenValue
     else {
-        if (tokenValue.equals(expectedToken))
+        if (tokenValue[0]===expectedToken)
             getToken();
         else
             errorMsg();
@@ -167,8 +204,14 @@ function match(expectedToken){
 
 function getToken() {
     //This function should insert the token in its rightful place in the diagram
+    nodes.push({parent: nodes[n], text : { name : tokenValue[0] }});
+    n++;
+    tokenValue.shift();
+    tokenType.shift();
+    program();
 }
 
 function errorMsg() {
     //This function should say that there's an error.
+    console.log("error flag");
 }
