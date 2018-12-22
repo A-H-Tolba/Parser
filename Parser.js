@@ -35,12 +35,7 @@ input.addEventListener('change', function(e)
 //program->stmtSeq
 function program() {
     //This is the function to be called in the main function once you are ready to start ( you will probably need to do some stuff like tokens manipulation before calling it)
-    if(tokenValue.length) stmtSeq();
-    else
-    {
-        document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
-        new Treant(nodes);
-    }
+    stmtSeq();
 }
 //stmtSeq->stmt{;stmt}
 function stmtSeq() {
@@ -183,13 +178,10 @@ function factor() {
 
 function match(expectedToken){
     //compare the tokenType
-    console.log(expectedToken);
-    console.log(tokenType[0]);
     if (expectedToken == "identifier" || expectedToken == "number") {
         if (tokenType[0]===expectedToken)
             getToken();
         else
-            console.log("something's wrong flag");
             errorMsg();
     }
     //compare the tokenValue
@@ -208,7 +200,12 @@ function getToken() {
     n++;
     tokenValue.shift();
     tokenType.shift();
-    program();
+    if(!tokenValue.length) 
+    {
+        document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
+        new Treant(nodes);
+    }
+
 }
 
 function errorMsg() {
