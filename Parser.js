@@ -4,6 +4,7 @@ var tokenType = [];
 var nodes = [{container: "#Parser", hideRootNode: true}, {}];
 var n = 1;
 var temp;
+var cp = [];
 const input = document.querySelector("#ip");
 input.addEventListener('change', function(e)
 {
@@ -37,6 +38,8 @@ input.addEventListener('change', function(e)
 function program() {
     //This is the function to be called in the main function once you are ready to start ( you will probably need to do some stuff like tokens manipulation before calling it)
     stmtSeq();
+    document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
+    new Treant(nodes);
 }
 //stmtSeq->stmt{;stmt}
 function stmtSeq() {
@@ -205,12 +208,6 @@ function getToken() {
     }
     tokenValue.shift();
     tokenType.shift();
-    if(!tokenValue.length) 
-    {
-        document.getElementsByTagName("BODY")[0].innerHTML = '<div class="chart" id="Parser"></div>';
-        new Treant(nodes);
-    }
-
 }
 
 function errorMsg() {
